@@ -24,11 +24,17 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.io.IOException;
 
@@ -124,6 +130,17 @@ public class Test {
          */
         builder.from(0);
         builder.size(10);
+        /**
+         * 排序
+         */
+        builder.sort("age", SortOrder.DESC);
+        /**
+         * 过滤字段
+         */
+        String[] excludes={};
+        String[] includes={"name"};
+        builder.fetchSource(includes,excludes);
+
         searchRequest.source(builder);
         SearchResponse response1 = esClient.search(searchRequest, RequestOptions.DEFAULT);
         SearchHits hits = response1.getHits();
@@ -137,6 +154,46 @@ public class Test {
         //条件查询（精确条件）
         searchRequest.source(new SearchSourceBuilder().query(QueryBuilders.termQuery("age","30")));
 
+
+        //#################################### 多条件查询 #######################################
+        /**
+         * ........
+         * SearchSourceBuilder builders = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+         *         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+         *         boolQueryBuilder.must(QueryBuilders.matchQuery("age",30));
+         *         boolQueryBuilder.mustNot(QueryBuilders.matchQuery("age",40));
+         *         boolQueryBuilder.should(QueryBuilders.matchQuery("sex","男"));
+         *         builder.query(boolQueryBuilder);
+         *
+         * ........
+         */
+        //#################################### 范围查询 #######################################
+        /**
+         * .......
+         * SearchSourceBuilder builders = new SearchSourceBuilder();
+         *         RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("age");
+         *         rangeQuery.gte(30);//大于等于
+         *         rangeQuery.lte(50);//小于等于
+         *         builders.query(rangeQuery);
+         * .......
+         */
+
+        //#################################### 模糊查询 #######################################
+        /**
+         *  SearchSourceBuilder builders = new SearchSourceBuilder();
+         *         builders.query(QueryBuilders.fuzzyQuery("name","wangwu").fuzziness(Fuzziness.ONE));
+         *
+         */
+
+        //#################################### 查询结果高亮显示 #######################################
+        SearchSourceBuilder builders = new SearchSourceBuilder();
+        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("name", "wangwu");
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.preTags("<font color='red'>");
+        highlightBuilder.postTags("</font>");
+        highlightBuilder.field("name");
+        builders.highlighter(highlightBuilder);
+        builders.query(termsQueryBuilder);
 
         //#################################### 关闭es客户端 #######################################
         esClient.close();
