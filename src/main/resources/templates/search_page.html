@@ -218,19 +218,30 @@
                 <form class="form-inline">
                   <div class="form-group">
                     <label for="exampleInputName2">选择环境：</label>
-                    <select class="form-control" id="exampleInputName2" name="indexName">
+                    <select required="required" class="form-control" id="exampleInputName2" name="indexName">
                       <option disabled selected="selected">请选择</option>
-                      <option value="devlog-2021.06.08">开发环境</option>
+                      <option value="devlog-2021.06.09">开发环境</option>
                       <option value="log-2021.06.08">生产环境</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="exampleInputEmail2">&nbsp;&nbsp;&nbsp;&nbsp;时间段：从</label>
-                    <input type="datetime-local" class="form-control" id="exampleInputEmail2">
+                    <label for="logType">&nbsp;&nbsp;&nbsp;&nbsp;日志类型：</label>
+                    <select required="required" class="form-control" id="logType" name="indexName">
+                      <option disabled selected="selected">请选择</option>
+                      <option value="DEBUG">DEBUG</option>
+                      <option value="ERROR">ERROR</option>
+                      <option value="INFO">INFO</option>
+                      <option value="TRACE">TRACE</option>
+                      <option value="WARN">WARN</option>
+                    </select>
                   </div>
                   <div class="form-group">
-                    <label for="exampleInputEmail">到</label>
-                    <input type="datetime-local" class="form-control" id="exampleInputEmail">
+                    <label for="beginTime">&nbsp;&nbsp;&nbsp;&nbsp;时间段：从</label>
+                    <input type="datetime-local" class="form-control" id="beginTime">
+                  </div>
+                  <div class="form-group">
+                    <label for="endTime">到</label>
+                    <input type="datetime-local" class="form-control" id="endTime">
                   </div>
 
 
@@ -267,6 +278,9 @@
     background-color: lightgray;
     /*color: white;*/
   }
+  .active{
+    background-color: lightgray;
+  }
   .second>span{
     float:right;
     color:blue;
@@ -275,38 +289,9 @@
 </style>
                 <div class="table-responsive">
                     <div class="centers">
-                        <div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
-                          <div class="second">2021-01-01 12:01:04<span>调用成功</span></div>
+                        <div id="logContent">
+                          <!--<div class="second">2021-01-01 12:01:04<span>调用成功</span></div>-->
+
                         </div>
                         <div>
                           <textarea  style="height: 745px;width: 1260px;" disabled name="" id="content" cols="30" rows="10"></textarea>
@@ -335,6 +320,25 @@
 
 <!--图表插件-->
 <script type="text/javascript" th:src="@{/js/Chart.js}"></script>
+<script>
+    function getMain(e){
+        var nodes=e.parentNode.childNodes;
+        for(var i=0;i<nodes.length;i++){
+            nodes[i].classList.remove("active");
+        }
+        e.classList.add("active");
+        var docid=e.getAttribute("id");
+        var index=e.getAttribute("indexName");
+        $.get(
+            "/search/getLog?indexName="+index+"&docId="+docid,
+            function (data) {
+                $("#content").val(JSON.stringify(data.data));
+            },
+            "json"
+        );
+    }
+
+</script>
 <script type="text/javascript">
 $(function(){
     $('.search-bar .dropdown-menu a').click(function() {
@@ -344,15 +348,37 @@ $(function(){
     });
 });
 $("#search").click(function () {
-    $.post(
-        "/search/searchAll",
-        {indexName:$("#exampleInputName2").val()},
-        function (data) {
-            $("#content").val(JSON.stringify(data));
-        },
-        "json"
-    );
+    var selectVal = $("#exampleInputName2").val();
+    if(selectVal!=undefined && selectVal!=""){
+        $.post(
+            "/search/searchAll",
+            {
+                indexName:$("#exampleInputName2").val(),
+                beginTime:$("#beginTime").val(),
+                endTime:$("#endTime").val()
+            },
+            function (data) {
+                if(data.code == 500){
+                    alert(data.message);
+                }else{
+                    // $("#content").val(JSON.stringify(data.data));
+                    var result=data.data;
+                    var tempStr="";
+                    for(var i=0;i<result.length;i++){
+                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span>未知</span></div>';
+                    }
+                    $("#logContent").html(tempStr);
+                }
+
+            },
+            "json"
+        );
+    }else{
+        alert("环境为必填");
+    }
+
 });
+
 </script>
 </body>
 </html>

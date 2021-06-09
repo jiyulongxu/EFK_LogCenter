@@ -1,39 +1,35 @@
 package com.dayouzc.efk.logcenter.Controller;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.dayouzc.efk.logcenter.config.ClientPool;
-import org.apache.http.HttpHost;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
+
+import com.dayouzc.efk.logcenter.constant.JsonObject;
+import com.dayouzc.efk.logcenter.service.EsSearchService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
+
 
 /**
  * @author FanJiangFeng
  * @version 1.0.0
  * @ClassName SearchController.java
- * @Description TODO 检索日志
+ * @Description TODO 检索日志接口
  * @createTime 2021年06月08日 15:31:00
  */
 @RestController
@@ -41,43 +37,28 @@ import java.util.Map;
 public class SearchController {
     static Logger logger = LoggerFactory.getLogger(SearchController.class);
     @Autowired
-    private ClientPool clientPool;
+    EsSearchService searchService;
 
     /**
      * 查询全部日志
+     * 根据索引、开始时间、结束时间查询
      */
     @PostMapping("/searchAll")
-    public JSONArray searchLog(String indexName) throws IOException {
-        //得到连接
-        RestHighLevelClient client = clientPool.getConnection();
-        SearchRequest searchRequest=new SearchRequest();
-        searchRequest.indices(indexName);//索引名
-        SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
-        /**
-         * 查询分页
-         */
-        builder.from(0);
-        builder.size(10);
-        /**
-         * 过滤字段
-         */
-        String[] excludes={};
-        //只查询时间戳和日志字段
-        String[] includes={"@timestamp","message"};
-        builder.fetchSource(includes,excludes);
-        searchRequest.source(builder);
-        SearchResponse response1 = client.search(searchRequest, RequestOptions.DEFAULT);
-        SearchHits hits = response1.getHits();
-        System.out.println(hits.getTotalHits());//总条数
-        System.out.println(response1.getTook());//查询时间
-
-        JSONArray jsonArray=new JSONArray();
-
-        for(SearchHit hit:hits){
-            JSONObject jsonObject = JSONObject.parseObject(hit.getSourceAsString());
-            jsonArray.add(jsonObject);
-        }
-        return jsonArray;
-
+    public JsonObject<JSONArray> searchLog(String indexName,String beginTime,String endTime) throws IOException {
+        Assert.notNull(indexName,"索引不可为空");
+        return searchService.searchLog(indexName,beginTime,endTime);
     }
+
+    /**
+     * 根据日志id（文档id）和索引id 查询日志详情（文档详情）
+     */
+    @GetMapping("/getLog")
+    public JsonObject<String> getLog(String indexName,String docId) throws IOException {
+        Assert.notNull(indexName,"索引不可为空");
+        Assert.notNull(docId,"文档id不可为空");
+        return searchService.getLog(indexName,docId);
+    }
+
+
+
 }
