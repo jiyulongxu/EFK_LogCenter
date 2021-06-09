@@ -2,6 +2,8 @@ package com.dayouzc.efk.logcenter.Controller;
 
 import com.alibaba.fastjson.JSONArray;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dayouzc.efk.logcenter.constant.APPEnums;
 import com.dayouzc.efk.logcenter.constant.JsonObject;
 import com.dayouzc.efk.logcenter.service.EsSearchService;
 
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -23,6 +26,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.Set;
 
 
 /**
@@ -57,6 +61,19 @@ public class SearchController {
         Assert.notNull(indexName,"索引不可为空");
         Assert.notNull(docId,"文档id不可为空");
         return searchService.getLog(indexName,docId);
+    }
+
+    /**
+     * 查询存在有效的索引列表
+     */
+    @GetMapping("/getAllIndexs")
+    public JsonObject<Set<String>> getAllIndexs(){
+        Set<String> allIndexs = searchService.getAllIndexs();
+        if(allIndexs!=null){
+            return new JsonObject(allIndexs);
+        }else{
+            return JsonObject.Error();
+        }
     }
 
 

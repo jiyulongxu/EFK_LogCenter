@@ -220,8 +220,6 @@
                     <label for="exampleInputName2">选择环境：</label>
                     <select required="required" class="form-control" id="exampleInputName2" name="indexName">
                       <option disabled selected="selected">请选择</option>
-                      <option value="devlog-2021.06.09">开发环境</option>
-                      <option value="log-2021.06.08">生产环境</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -321,6 +319,11 @@
 <!--图表插件-->
 <script type="text/javascript" th:src="@{/js/Chart.js}"></script>
 <script>
+  $("#logContent").scroll(function () {
+      if($(this).scrollTop() > 3000){
+          alert("到底了");
+      }
+  });
     function getMain(e){
         var nodes=e.parentNode.childNodes;
         for(var i=0;i<nodes.length;i++){
@@ -332,7 +335,10 @@
         $.get(
             "/search/getLog?indexName="+index+"&docId="+docid,
             function (data) {
-                $("#content").val(JSON.stringify(data.data));
+                // $("#content").text(JSON.stringify(data.data));
+                var temp=  data.data.replace('\n','<br/><br/>');
+                $("#content").html(temp);
+
             },
             "json"
         );
@@ -341,6 +347,18 @@
 </script>
 <script type="text/javascript">
 $(function(){
+
+    $.get(
+        "/search/getAllIndexs",
+        function (data) {
+            var result=data.data;
+            for(var i=0;i<result.length;i++){
+                $("#exampleInputName2").append('<option value="'+result[i]+'">'+result[i]+'</option>');
+            }
+        }
+    );
+
+
     $('.search-bar .dropdown-menu a').click(function() {
         var field = $(this).data('field') || '';
         $('#search-field').val(field);

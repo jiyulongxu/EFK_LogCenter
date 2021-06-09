@@ -8,14 +8,20 @@ import com.dayouzc.efk.logcenter.constant.APPEnums;
 import com.dayouzc.efk.logcenter.constant.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.admin.indices.alias.Alias;
+import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.GetAliasesResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
+import org.elasticsearch.cluster.metadata.AliasMetadata;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
@@ -26,10 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author FanJiangFeng
@@ -56,11 +65,8 @@ public class EsSearchService {
         SearchRequest searchRequest=new SearchRequest();
         searchRequest.indices(indexName);//索引名
         SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
-        /**
-         * 查询分页
-         */
         builder.from(0);
-        builder.size(10);
+        builder.size(100);
         /**
          * 过滤字段
          */
@@ -118,6 +124,31 @@ public class EsSearchService {
         return new JsonObject<>(message);
     }
 
+    /**
+     * 查询存在有效的索引列表
+     * todo 要筛选rep为1的，还没有筛选
+     */
+    public Set<String> getAllIndexs(){
+        RestHighLevelClient connection = clientPool.getConnection();
+        try {
+            GetAliasesRequest request = new GetAliasesRequest();
+            request.indicesOptions(IndicesOptions.lenientExpandOpen());
+
+            GetAliasesResponse getAliasesResponse =  connection.indices().getAlias(request,RequestOptions.DEFAULT);
+            Map<String, Set<AliasMetadata>> map = getAliasesResponse.getAliases();
+            Set<String> indices = map.keySet();
+            //排除系统索引
+            String[] sys_indexs = {".apm-custom-link",".kibana_task_manager_1","kibana_sample_data_ecommerce",
+            ".apm-agent-configuration",".async-search",".kibana_1",".kibana-event-log-7.8.1-000001"};
+            for(String s:sys_indexs){
+                indices.remove(s);
+            }
+            return indices;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     /**
      * 检测索引是否存在

@@ -112,7 +112,7 @@ public class ClientPool {
      */
     @Scheduled(cron = "0/60 * * * * *") //每一分钟执行一次
     public void check() throws IOException {
-        logger.info("例行健康检查");
+        logger.info("ES连接池健康检查");
         for (int i = 0; i < activeSize.get(); i++) {
             RestHighLevelClient connection = idleConnectPool.poll();
                 boolean valid=isOk(connection);//校验连接是否可用，这里暂时写死为true
