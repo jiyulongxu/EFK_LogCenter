@@ -248,19 +248,27 @@
               </div>
               <div class="card-body">
 <style>
+
   .centers{
     width: 100%;
-    height: 750px;
-    margin: auto;
-    display: flex;
+    height: 700px;
+    /*margin: auto;*/
+    /*display: flex;*/
   }
   .centers>div:first-child{
+    float: left;
+    width: 20%;
+    height: 700px;
     border: 1px solid gray;
-    flex: 2;
+    /*flex: 4;*/
     overflow: scroll;
 
   }
   .centers>div:last-child{
+    float: left;
+    width: 70%;
+    height: 700px;
+    border: 1px solid red;
     flex: 8;
   }
   .second{
@@ -285,17 +293,17 @@
     margin-right: 15px;
   }
 </style>
-                <div class="table-responsive">
+                <!--<div class="table-responsive">-->
                     <div class="centers">
                         <div id="logContent">
                           <!--<div class="second">2021-01-01 12:01:04<span>调用成功</span></div>-->
 
                         </div>
                         <div>
-                          <textarea  style="height: 745px;width: 1260px;" disabled name="" id="content" cols="30" rows="10"></textarea>
+                          <textarea  style="height: 100%;width: 100%;" disabled name="" id="content" cols="30" rows="10"></textarea>
                         </div>
                     </div>
-                </div>
+                <!--</div>-->
 
 
               </div>

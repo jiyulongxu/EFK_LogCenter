@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.Set;
+import java.util.TimeZone;
 
 
 /**
@@ -43,6 +45,19 @@ public class SearchController {
     @Autowired
     EsSearchService searchService;
 
+    public String transfterDate(String time){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+        String format="";
+        try {
+            Date parse = sdf.parse(time);
+             format = sdf.format(parse);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return format;
+    }
+
     /**
      * 查询全部日志
      * 根据索引、开始时间、结束时间查询
@@ -50,7 +65,10 @@ public class SearchController {
     @PostMapping("/searchAll")
     public JsonObject<JSONArray> searchLog(String indexName,String beginTime,String endTime) throws IOException {
         Assert.notNull(indexName,"索引不可为空");
-        return searchService.searchLog(indexName,beginTime,endTime);
+        if(beginTime!=null && !"".equals(beginTime)){
+            return searchService.searchLog(indexName,transfterDate(beginTime),transfterDate(endTime));
+        }
+        return searchService.searchLog(indexName,null,null);
     }
 
     /**

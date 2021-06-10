@@ -38,10 +38,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author FanJiangFeng
@@ -56,14 +53,6 @@ public class EsSearchService {
 
     @Autowired
     private ClientPool clientPool;
-
-    //时间格式转换
-    public void transferDate(String date) throws ParseException {
-        SimpleDateFormat sdf=new SimpleDateFormat();
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
-        Date parse = df.parse(date);
-
-    }
 
     /**
      * 查询全部日志
@@ -89,12 +78,13 @@ public class EsSearchService {
         /**
          * 根据时间范围查询
          */
-        if(!StringUtils.isBlank(beginDate) && !StringUtils.isBlank(endDate)){
+        if(beginDate!=null && endDate!=null){
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("@timestamp");
-            rangeQuery.gte(beginDate);
-            rangeQuery.lte(endDate);
+            rangeQuery.gt(beginDate);
+            rangeQuery.lt(endDate);
             builder.query(rangeQuery);
         }
+
 
         searchRequest.source(builder);
         SearchResponse response1 = client.search(searchRequest, RequestOptions.DEFAULT);
