@@ -35,6 +35,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +56,15 @@ public class EsSearchService {
 
     @Autowired
     private ClientPool clientPool;
+
+    //时间格式转换
+    public void transferDate(String date) throws ParseException {
+        SimpleDateFormat sdf=new SimpleDateFormat();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS Z");
+        Date parse = df.parse(date);
+
+    }
+
     /**
      * 查询全部日志
      */
