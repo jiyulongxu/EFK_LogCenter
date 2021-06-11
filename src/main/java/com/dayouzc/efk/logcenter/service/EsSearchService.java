@@ -23,6 +23,7 @@ import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -57,7 +58,7 @@ public class EsSearchService {
     /**
      * 查询全部日志
      */
-    public JsonObject<JSONArray> searchLog(String indexName, String beginDate,String endDate) throws IOException {
+    public JsonObject<JSONArray> searchLog(String indexName, String beginDate,String endDate,String logType,Integer pageNo,Integer pageSize) throws IOException {
         //检查索引是否有效
         boolean check = checkIndex(indexName);
         if(!check)return new JsonObject(null,500,"索引不存在");
@@ -66,25 +67,36 @@ public class EsSearchService {
         SearchRequest searchRequest=new SearchRequest();
         searchRequest.indices(indexName);//索引名
         SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
-        builder.from(0);
-        builder.size(100);
+        //分页
+        /**
+         * pageNo*pageSize-pageSize
+         */
+        builder.from(pageNo*pageSize-pageSize);
+        builder.size(pageSize);
         /**
          * 过滤字段
          */
         String[] excludes={};
         //只查询时间字段
-        String[] includes={"time"};
+        String[] includes={"time","timestamp"};
         builder.fetchSource(includes,excludes);
         /**
          * 根据时间范围查询
          */
         if(beginDate!=null && endDate!=null){
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("@timestamp");
-            rangeQuery.gt(beginDate);
-            rangeQuery.lt(endDate);
+            rangeQuery.gte(beginDate);
+            rangeQuery.lte(endDate);
             builder.query(rangeQuery);
         }
 
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+
+        //根据日志类型搜索
+        if(StringUtils.isNoneBlank(logType)){
+            boolQueryBuilder.must(QueryBuilders.matchQuery("level",logType));
+            builder.query(boolQueryBuilder);
+        }
 
         searchRequest.source(builder);
         SearchResponse response1 = client.search(searchRequest, RequestOptions.DEFAULT);
