@@ -78,7 +78,7 @@ public class EsSearchService {
          */
         String[] excludes={};
         //只查询时间字段
-        String[] includes={"time","timestamp"};
+        String[] includes={"time","timestamp","message"};
         builder.fetchSource(includes,excludes);
         /**
          * 根据时间范围查询
@@ -114,6 +114,23 @@ public class EsSearchService {
             jsonObject.put("index",index);
             JSONObject timeObj = JSONObject.parseObject(hit.getSourceAsString());
             jsonObject.put("source",timeObj.get("time"));
+            /**
+             * 判断该日志是否请求成功或报错
+             * todo 目前解决方案待完善，此方法并不特别适合，这里判断message字段中是否包含Exception文字的
+             * todo 后期需要调整
+             */
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+            Object message = sourceAsMap.get("message");
+            if(message!=null) {
+                String newMsg = message.toString();
+                if (StringUtils.contains(newMsg, "Exception")) {
+                    //报错
+                    jsonObject.put("status","error");
+                } else {
+                    //正常
+                    jsonObject.put("status","normal");
+                }
+            }
 
             jsonArray.add(jsonObject);
         }

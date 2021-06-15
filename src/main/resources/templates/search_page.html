@@ -61,15 +61,15 @@
           <ul class="topbar-right">
             <li class="dropdown dropdown-profile">
               <a href="javascript:void(0)" data-toggle="dropdown">
-                <img class="img-avatar img-avatar-48 m-r-10" th:src="@{/images/users/avatar.jpg}" alt="管理员" />
-                <span>管理员 <span class="caret"></span></span>
+                <img class="img-avatar img-avatar-48 m-r-10" th:src="@{/images/users/avatar.jpg}" />
+                <span th:text="${account}"><span class="caret"></span></span>
               </a>
               <ul class="dropdown-menu dropdown-menu-right">
                 <li> <a href="lyear_pages_profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
                 <li> <a href="lyear_pages_edit_pwd.html"><i class="mdi mdi-lock-outline"></i> 修改密码</a> </li>
                 <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
                 <li class="divider"></li>
-                <li> <a href="lyear_pages_login.html"><i class="mdi mdi-logout-variant"></i> 退出登录</a> </li>
+                <li> <a href="/page/logout"><i class="mdi mdi-logout-variant"></i> 退出登录</a> </li>
               </ul>
             </li>
             <!--切换主题配色-->
@@ -354,7 +354,13 @@
                                 var result=data.data;
                                 var tempStr="";
                                 for(var i=0;i<result.length;i++){
-                                    tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span>未知</span></div>';
+                                    //请求日志的状态是否正常
+                                    var status=result[i].status;
+                                    if(status == 'normal'){
+                                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: blue;">调用成功</span></div>';
+                                    }else if(status == 'error'){
+                                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: red;">调用失败</span></div>';
+                                    }
                                 }
                                 $("#logContent").append(tempStr);
                             }
@@ -364,37 +370,7 @@
                     );
         }
     });
-  // $("#logContent").scroll(function () {
-  //
-  //
-  //     if($(this).height() == $(window).height() + $(window).scrollTop()){
-  //         // alert("到底了");
-  //         $.post(
-  //             "/search/searchAll",
-  //             {
-  //                 indexName:$("#exampleInputName2").val(),
-  //                 beginTime:$("#beginTime").val(),
-  //                 endTime:$("#endTime").val(),
-  //                 logType:$("#logType").val()
-  //             },
-  //             function (data) {
-  //                 if(data.code == 500){
-  //                     alert(data.message);
-  //                 }else{
-  //                     // $("#content").val(JSON.stringify(data.data));
-  //                     var result=data.data;
-  //                     var tempStr="";
-  //                     for(var i=0;i<result.length;i++){
-  //                         tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span>未知</span></div>';
-  //                     }
-  //                     $("#logContent").append(tempStr);
-  //                 }
-  //
-  //             },
-  //             "json"
-  //         );
-  //     }
-  // });
+
     function getMain(e){
         var nodes=e.parentNode.childNodes;
         for(var i=0;i<nodes.length;i++){
@@ -452,11 +428,16 @@ $("#search").click(function () {
                 if(data.code == 500){
                     alert(data.message);
                 }else{
-                    // $("#content").val(JSON.stringify(data.data));
                     var result=data.data;
                     var tempStr="";
                     for(var i=0;i<result.length;i++){
-                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span>未知</span></div>';
+                        //请求日志的状态是否正常
+                        var status=result[i].status;
+                        if(status == 'normal'){
+                            tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: blue;">调用成功</span></div>';
+                        }else if(status == 'error'){
+                            tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: red;">调用失败</span></div>';
+                        }
                     }
                     $("#logContent").html(tempStr);
                 }
