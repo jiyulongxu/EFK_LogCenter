@@ -272,11 +272,11 @@
     flex: 8;
   }
   .second{
-    height: 40px;
+    height: 55px;
     width: 100%;
     border: 1px solid lightgray;
     padding-left: 5px;
-    line-height: 40px;
+    line-height: 55px;
     cursor: pointer;
 
   }
@@ -357,7 +357,7 @@
                                     //请求日志的状态是否正常
                                     var status=result[i].status;
                                     if(status == 'normal'){
-                                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: blue;">调用成功</span></div>';
+                                        tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: green;">调用成功</span></div>';
                                     }else if(status == 'error'){
                                         tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: red;">调用失败</span></div>';
                                     }
@@ -434,7 +434,7 @@ $("#search").click(function () {
                         //请求日志的状态是否正常
                         var status=result[i].status;
                         if(status == 'normal'){
-                            tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: blue;">调用成功</span></div>';
+                            tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: green;">调用成功</span></div>';
                         }else if(status == 'error'){
                             tempStr+='<div id="'+result[i].id+'" indexName="'+result[i].index+'" onclick="getMain(this)" class="second">' +result[i].source+ '<span style="color: red;">调用失败</span></div>';
                         }
