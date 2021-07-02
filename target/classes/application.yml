@@ -1,0 +1,11 @@
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    encoding: UTF-8
+    cache: false
+# es配置
+es:
+  ip: 172.16.2.209
+  port: 9200
+  type: http

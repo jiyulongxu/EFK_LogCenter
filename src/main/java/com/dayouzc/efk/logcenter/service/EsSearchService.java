@@ -29,6 +29,7 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ public class EsSearchService {
          */
         builder.from(pageNo*pageSize-pageSize);
         builder.size(pageSize);
+        builder.sort("@timestamp", SortOrder.DESC);
         /**
          * 过滤字段
          */
